@@ -1,0 +1,48 @@
+{
+  "name": "ghost-octopress-converter",
+  "description": "For converting your Octopress blog to Ghost.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/mikl/ghost-octopress-converter",
+  "author": {
+    "name": "Mikkel Hoegh",
+    "email": "mikkel@hoegh.org",
+    "url": "http://mikkel.hoegh.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikl/ghost-octopress-converter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikl/ghost-octopress-converter/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mikl/ghost-octopress-converter/blob/master/LICENSE"
+    }
+  ],
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt": "~0.4.1"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.1"
+  },
+  "keywords": [
+    "gruntplugin"
+  ],
+  "dependencies": {
+    "yaml-front-matter": "~2.1.0",
+    "async": "~0.2.9",
+    "request": "~2.27.0"
+  }
+}
