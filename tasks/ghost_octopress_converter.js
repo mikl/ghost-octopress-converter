@@ -15,6 +15,12 @@ var util = require('util');
 var uuid = require('uuid');
 var yamlFront = require('yaml-front-matter');
 
+// Used to strip the date from the file name, in case there's not a slug
+// in the metadata, and we're falling back on the file name.
+var fileNameDateMatcher = /^[0-9]{4}-[0-9]{2}-[0-9]{2}-/;
+// And the same for the file extention.
+var fileNameExtensionMatcher = /\.[\w]+$/;
+
 // Clean the string up, since the YAML might have contained unwanted whitespace.
 function cleanString(inputString) {
   if (!inputString) {
@@ -136,6 +142,14 @@ module.exports = function(grunt) {
 
           postId += 1;
 
+          // Fall back on the filename, sans date and extention, if a
+          // slug was not specified in the metadata.
+          if (!post.slug) {
+            post.slug = meta.fileName.replace(fileNameDateMatcher, '').replace(fileNameExtensionMatcher, '');
+
+            grunt.log.writeln('File ' + meta.fileName + ' did not have a slug value in its metadata. Falling back to ' + post.slug + ' as extracted from the file name.');
+          }
+
           // // Categories might be an array of tags.
           // if (util.isArray(meta.categories)) {
           //   meta.categories.forEach(function (tag) {
@@ -166,7 +180,6 @@ module.exports = function(grunt) {
         grunt.log.error(err);
       }
 
-      console.log(posts);
       fs.writeFile(outFile, JSON.stringify({
         meta: {
           exported_on: Date.now(),
