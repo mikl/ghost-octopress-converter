@@ -41,6 +41,21 @@ function expandPath(inputPath) {
   return outputPath;
 }
 
+// Slugify a text string.
+function slugify(inputString) {
+  var output = inputString.toLowerCase();
+
+  output = output.replace(/[^a-z0-9_-]/g, '-');
+
+  // Avoid having more than one dash in a row.
+  output = output.replace(/--+/g, '-');
+
+  // Avoid starting or ending with a dash.
+  output = output.replace(/^-+|-+$/g, '');
+
+  return output;
+}
+
 module.exports = function(grunt) {
 
   grunt.registerTask('ghost_octopress_converter', 'For converting your Octopress blog to Ghost.', function (octoPath, outFile) {
@@ -90,9 +105,17 @@ module.exports = function(grunt) {
     // function.
     var done = this.async();
 
-    // Incremented to create the sequential post IDs Ghost seems to want
-    // at the moment, in addition to the UUID.
+    // Incremented to create the sequential post and tag IDs Ghost seems
+    // to want at the moment, in addition to the UUID.
     var postId = 1;
+    var tagId = 1;
+    var tagRelationId = 1;
+
+    // Keeping track of which tags we have and what their IDs are.
+    var tags = {};
+
+    // Keep track of which tags are linked to which posts.
+    var tagRelations = [];
 
     async.mapSeries(postFiles, function (filePath, callback) {
       var postFilePath = filePath.replace(postsDir, '').slice(1);
@@ -137,7 +160,6 @@ module.exports = function(grunt) {
             markdown: cleanString(meta.__content),
             slug: cleanString(meta.slug),
             status: 'published',
-            // tags: []
           };
 
           postId += 1;
@@ -150,27 +172,65 @@ module.exports = function(grunt) {
             grunt.log.writeln('File ' + meta.fileName + ' did not have a slug value in its metadata. Falling back to ' + post.slug + ' as extracted from the file name.');
           }
 
-          // // Categories might be an array of tags.
-          // if (util.isArray(meta.categories)) {
-          //   meta.categories.forEach(function (tag) {
-          //     post.tags.push({id: null, name: tag});
-          //   });
-          // }
-          // // Or it might be a single string.
-          // else if (meta.categories && meta.categories.length > 1) {
-          //   post.tags.push({id: null, name: meta.categories});
-          // }
+          // Find tags on this post.
+          var postTags = [];
 
-          // // Tags might be an array of tags.
-          // if (util.isArray(meta.tags)) {
-          //   meta.tags.forEach(function (tag) {
-          //     post.tags.push({id: null, name: tag});
-          //   });
-          // }
-          // // Or it might be a single string.
-          // else if (meta.tags && meta.tags.length > 1) {
-          //   post.tags.push({id: null, name: meta.tags});
-          // }
+          // Categories might be an array of postTags.
+          if (util.isArray(meta.categories)) {
+            meta.categories.forEach(function (tag) {
+              postTags.push(tag);
+            });
+          }
+          // Or it might be a single string.
+          else if (meta.categories && meta.categories.length > 1) {
+            postTags.push(meta.categories);
+          }
+
+          // postTags might be an array of postTags.
+          if (util.isArray(meta.postTags)) {
+            meta.postTags.forEach(function (tag) {
+              postTags.push(tag);
+            });
+          }
+          // Or it might be a single string.
+          else if (meta.postTags && meta.postTags.length > 1) {
+            postTags.push(meta.postTags);
+          }
+
+          if (postTags) {
+            postTags.forEach(function (tag) {
+              var slug = slugify(tag);
+
+              // If we haven't seen this tag before, add it to the export.
+              if (!tags[slug]) {
+                tags[slug] = {
+                  id: tagId,
+                  uuid: uuid.v4(),
+                  name: tag,
+                  slug: slug,
+                  description: null,
+                  parent_id: null,
+                  meta_title: null,
+                  meta_description: null,
+                  created_at: created_at,
+                  created_by: 1,
+                  updated_at: updated_at,
+                  updated_by: 1
+                };
+
+                tagId += 1;
+              }
+
+              // Add a relation between the post and the tag.
+              tagRelations.push({
+                id: tagRelationId,
+                post_id: post.id,
+                tag_id: tags[slug].id,
+              });
+
+              tagRelationId += 1;
+            });
+          }
 
           callback(null, post);
         },
@@ -187,7 +247,11 @@ module.exports = function(grunt) {
           version: "002"
         },
         data: {
-          posts: posts
+          posts: posts,
+          // Tags is supposed to be a sequential array, like posts, so
+          // transform thus.
+          tags: Object.keys(tags).map(function (key) { return tags[key]; }),
+          posts_tags: tagRelations,
         }
       }), function (err) {
         if (err) {
