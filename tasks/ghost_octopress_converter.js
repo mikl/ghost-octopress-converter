@@ -15,8 +15,19 @@ var util = require('util');
 var uuid = require('uuid');
 var yamlFront = require('yaml-front-matter');
 
+// Clean the string up, since the YAML might have contained unwanted whitespace.
+function cleanString(inputString) {
+  if (!inputString) {
+    return '';
+  }
+
+  // String.trim() is not multiline, so we need do our own to get rid
+  // of extra linebreaks.
+  return inputString.replace(/^\s+|\s+$/gm, '');
+}
+
 // Expand homedir and resolve the path.
-function expandPath (inputPath) {
+function expandPath(inputPath) {
   var outputPath = inputPath.replace('~', process.env.HOME);
 
   outputPath = path.resolve(outputPath);
@@ -117,8 +128,8 @@ module.exports = function(grunt) {
             created_at: created_at,
             published_at: created_at,
             updated_at: updated_at,
-            markdown: meta.__content.trim(),
-            slug: meta.slug.trim(),
+            markdown: cleanString(meta.__content),
+            slug: cleanString(meta.slug),
             status: 'published',
             // tags: []
           };
