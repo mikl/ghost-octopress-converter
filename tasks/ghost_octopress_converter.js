@@ -27,9 +27,7 @@ function cleanString(inputString) {
     return '';
   }
 
-  // String.trim() is not multiline, so we need do our own to get rid
-  // of extra linebreaks.
-  return inputString.replace(/^\s+|\s+$/gm, '');
+  return inputString.trim();
 }
 
 // Expand homedir and resolve the path.
