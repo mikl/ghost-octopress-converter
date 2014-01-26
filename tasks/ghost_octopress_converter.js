@@ -38,7 +38,7 @@ function convertTags(inputString) {
   // {% img /images/static/image.png 496 99 Alt-text here %}
   // Does not cover all of http://octopress.org/docs/plugins/image-tag/
   // but just the subset I use. Pull requests welcome.
-  output = output.replace(/\{% img ([\S]+) (\d+)? ?(\d+)? (.*)%\}/, '<img src="/content$1" alt="$4" />');
+  output = output.replace(/\{% img ([\S]+) (\d+)? ?(\d+)? (.*)%\}/, '![$4](/content$1)');
 
   // Convert the codeblock tag to a fenced code block, like this one:
   // {% codeblock lang:php %}
