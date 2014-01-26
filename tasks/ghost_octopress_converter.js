@@ -44,10 +44,10 @@ function convertTags(inputString) {
   // {% codeblock lang:php %}
   // Ghost uses the same syntax as Github:
   // https://help.github.com/articles/github-flavored-markdown 
-  output = output.replace(/\{% codeblock(?: lang:(\w+))?.*?%\}/, '```$1');
+  output = output.replace(/\{% codeblock(?: lang:(\w+))?.*?%\}/g, '```$1');
 
   // Convert the endcodeblock tag to end the fenced code block.
-  output = output.replace(/\{% endcodeblock.*?%\}/, '```');
+  output = output.replace(/\{% endcodeblock.*?%\}/g, '```');
 
   return output;
 }
