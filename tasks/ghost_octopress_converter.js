@@ -30,6 +30,19 @@ function cleanString(inputString) {
   return inputString.trim();
 }
 
+// Convert Octopress tags whereever possible.
+function convertTags(inputString) {
+  var output = cleanString(inputString);
+
+  // Convert image tags like this one:
+  // {% img /images/static/image.png 496 99 Alt-text here %}
+  // Does not cover all of http://octopress.org/docs/plugins/image-tag/
+  // but just the subset I use. Pull requests welcome.
+  output = output.replace(/\{% img ([\S]+) (\d+)? ?(\d+)? (.*)%\}/, '<img src="/content$1" alt="$4" />');
+
+  return output;
+}
+
 // Expand homedir and resolve the path.
 function expandPath(inputPath) {
   var outputPath = inputPath.replace('~', process.env.HOME);
@@ -155,7 +168,7 @@ module.exports = function(grunt) {
             created_at: created_at,
             published_at: created_at,
             updated_at: updated_at,
-            markdown: cleanString(meta.__content),
+            markdown: convertTags(meta.__content),
             slug: cleanString(meta.slug),
             status: 'published',
           };
