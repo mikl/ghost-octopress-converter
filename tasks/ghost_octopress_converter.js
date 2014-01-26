@@ -40,6 +40,15 @@ function convertTags(inputString) {
   // but just the subset I use. Pull requests welcome.
   output = output.replace(/\{% img ([\S]+) (\d+)? ?(\d+)? (.*)%\}/, '<img src="/content$1" alt="$4" />');
 
+  // Convert the codeblock tag to a fenced code block, like this one:
+  // {% codeblock lang:php %}
+  // Ghost uses the same syntax as Github:
+  // https://help.github.com/articles/github-flavored-markdown 
+  output = output.replace(/\{% codeblock(?: lang:(\w+))?.*?%\}/, '```$1');
+
+  // Convert the endcodeblock tag to end the fenced code block.
+  output = output.replace(/\{% endcodeblock.*?%\}/, '```');
+
   return output;
 }
 
