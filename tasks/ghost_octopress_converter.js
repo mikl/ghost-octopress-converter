@@ -31,7 +31,7 @@ function cleanString(inputString) {
 }
 
 // Convert Octopress tags whereever possible.
-function convertTags(inputString) {
+function convertTags(inputString, fileName, logger) {
   var output = cleanString(inputString);
 
   // Convert image tags like this one:
@@ -48,6 +48,14 @@ function convertTags(inputString) {
 
   // Convert the endcodeblock tag to end the fenced code block.
   output = output.replace(/\{% endcodeblock.*?%\}/g, '```');
+
+  var leftovers = output.match(/\{%.*?%\}/g);
+
+  if (leftovers) {
+    leftovers.forEach(function (match) {
+      logger('Tag: `' + match + '` found in file: `' + fileName + '` could not be automatically converted. You will have to convert it manually.');
+    });
+  }
 
   return output;
 }
@@ -177,7 +185,7 @@ module.exports = function(grunt) {
             created_at: created_at,
             published_at: created_at,
             updated_at: updated_at,
-            markdown: convertTags(meta.__content),
+            markdown: convertTags(meta.__content, meta.fileName, grunt.log.error),
             slug: cleanString(meta.slug),
             status: 'published',
           };
